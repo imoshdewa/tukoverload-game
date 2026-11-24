@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TukOverload</title>
+<meta name="description" content="TukOverload: load a tuk-tuk with teddies, cakes and presents and drive them home without dropping anything. A colourful driving game for young children. No ads, no data collected.">
+<meta property="og:title" content="TukOverload">
+<meta property="og:description" content="Load it up. Drive it home. Don't drop the cake! A colourful driving game for young children.">
+<meta property="og:image" content="https://imoshdewa.github.io/tukoverload-game/img/feature_1024x500.png">
+<meta name="theme-color" content="#6fd0ff">
+<link rel="icon" href="img/icon_512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2b2250;
+    --sun: #ffc93c;
+    --coral: #ff5a6e;
+    --teal: #19c3b0;
+    --grape: #7b5cff;
+    --leaf: #25a850;
+    --cream: #fff6dc;
+    --sky-top: #6fd0ff;
+    --sky-low: #fff0cc;
+    --hill: #6ad486;
+    --hill-far: #a8e6b0;
+    --road: #5b4a82;
+    --night: #141a52;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Fredoka", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+    font-size: 18px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  /* ---------- the chunky button ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: .6rem;
+    padding: .85rem 1.6rem;
+    font: 700 1.25rem "Fredoka", sans-serif;
+    color: #fff;
+    background: var(--leaf);
+    border: 5px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 7px 0 var(--ink);
+    text-decoration: none;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn:hover { transform: translateY(2px); box-shadow: 0 5px 0 var(--ink); }
+  .btn:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--ink); }
+  .btn svg { width: 26px; height: 26px; flex: none; }
+  .btn.alt { background: var(--sun); color: var(--ink); }
+
+  /* ---------- hero: sky, sun, clouds, hills, road ---------- */
+  .hero {
+    position: relative;
+    background: linear-gradient(var(--sky-top), #bfe9ff 55%, var(--sky-low));
+    padding: 3.5rem 0 0;
+    overflow: hidden;
+  }
+  .sun {
+    position: absolute; top: 2.2rem; right: 9%;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--sun); border: 6px solid var(--ink);
+    box-shadow: 0 0 0 26px rgba(255, 236, 160, .45), 0 0 0 60px rgba(255, 236, 160, .22);
+  }
+  .sun::before, .sun::after {   /* the eyes and the smile */
+    content: ""; position: absolute;
+  }
+  .sun::before { top: 38px; left: 30px; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); box-shadow: 36px 0 0 var(--ink); }
+  .sun::after { top: 54px; left: 32px; width: 44px; height: 22px; border: 6px solid var(--ink); border-top: 0; border-radius: 0 0 40px 40px; }
+  .cloud {
+    position: absolute; width: 130px; height: 46px; background: #fff; border-radius: 40px;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before { width: 60px; height: 60px; top: -30px; left: 18px; }
+  .cloud::after { width: 46px; height: 46px; top: -20px; left: 64px; }
+  .c1 { top: 4rem; animation-duration: 48s; }
+  .c2 { top: 9rem; animation-duration: 70s; animation-delay: -30s; transform: scale(.7); }
+  .c3 { top: 2rem; animation-duration: 60s; animation-delay: -12s; transform: scale(.85); }
+  @keyframes drift { from { left: -180px; } to { left: 110%; } }
+
+  .hero-text { position: relative; text-align: center; z-index: 2; }
+  .logo {
+    margin: 0;
+    font-size: clamp(3rem, 11vw, 6.8rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--sun);
+    -webkit-text-stroke: 10px var(--ink);
+    paint-order: stroke fill;
+    letter-spacing: .02em;
+    filter: drop-shadow(0 8px 0 var(--ink));
+  }
+  .logo span { color: var(--coral); }
+  .tagline {
+    margin: 1.2rem auto 1.6rem;
+    font-size: clamp(1.2rem, 3.4vw, 1.7rem);
+    font-weight: 600;
+    max-width: 28ch;
+  }
+  .note { margin: .9rem 0 0; font-size: 1rem; font-weight: 600; opacity: .8; }
+
+  .scene { position: relative; height: 400px; margin-top: .5rem; }
+  .hills {
+    position: absolute; left: -5%; right: -5%; bottom: 120px; height: 160px;
+    background:
+      radial-gradient(120px 90px at 10% 100%, var(--hill-far) 98%, transparent 100%),
+      radial-gradient(160px 110px at 38% 100%, var(--hill-far) 98%, transparent 100%),
+      radial-gradient(140px 100px at 70% 100%, var(--hill-far) 98%, transparent 100%),
+      radial-gradient(180px 120px at 95% 100%, var(--hill-far) 98%, transparent 100%);
+  }
+  .grass { position: absolute; left: 0; right: 0; bottom: 110px; height: 60px; background: var(--hill); border-radius: 60% 60% 0 0 / 100% 100% 0 0; }
+  .road {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 120px;
+    background: var(--road); border-top: 8px solid var(--ink);
+  }
+  .road::after {   /* the dashes slide by */
+    content: ""; position: absolute; left: 0; right: -200px; top: 54px; height: 12px;
+    background: repeating-linear-gradient(90deg, #ffe9a8 0 90px, transparent 90px 200px);
+    animation: dashes 1.4s linear infinite;
+  }
+  @keyframes dashes { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+  .tuk {
+    position: absolute; left: 50%; bottom: 104px; width: min(380px, 74vw);
+    transform: translateX(-50%);
+    animation: bounce .45s ease-in-out infinite alternate;
+    z-index: 2;
+  }
+  @keyframes bounce { from { margin-bottom: 0; } to { margin-bottom: 6px; } }
+
+  /* ---------- sections ---------- */
+  section { padding: 4.5rem 0; }
+  h2 {
+    margin: 0 0 .6rem;
+    font-size: clamp(2rem, 5.5vw, 3rem);
+    line-height: 1.1;
+    text-align: center;
+  }
+  .lead { text-align: center; max-width: 36ch; margin: 0 auto 2.8rem; font-size: 1.2rem; }
+
+  .features { background: var(--cream); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.4rem; }
+  .card {
+    border: 5px solid var(--ink);
+    border-radius: 28px;
+    padding: 1.5rem 1.3rem 1.4rem;
+    box-shadow: 0 8px 0 var(--ink);
+    color: var(--ink);
+  }
+  .card:nth-child(1) { background: var(--sun); transform: rotate(-1.5deg); }
+  .card:nth-child(2) { background: var(--teal); transform: rotate(1deg); }
+  .card:nth-child(3) { background: var(--coral); transform: rotate(-.8deg); }
+  .card:nth-child(4) { background: var(--grape); color: #fff; transform: rotate(1.4deg); }
+  .card .emoji {
+    display: grid; place-items: center;
+    width: 74px; height: 74px; margin-bottom: .8rem;
+    font-size: 2.5rem; line-height: 1;
+    background: #fff; border: 5px solid var(--ink); border-radius: 50%;
+  }
+  .card h3 { margin: 0 0 .35rem; font-size: 1.5rem; }
+  .card p { margin: 0; font-weight: 600; }
+
+  .shots { background: linear-gradient(var(--hill), var(--leaf)); color: #fff; }
+  .shots h2, .shots .lead { color: #fff; text-shadow: 0 3px 0 rgba(43, 34, 80, .35); }
+  .strip {
+    display: grid; grid-auto-flow: column; grid-auto-columns: min(80%, 560px);
+    gap: 1.2rem; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: .5rem 16px 1.6rem;
+  }
+  .strip img {
+    scroll-snap-align: center;
+    border: 6px solid var(--ink); border-radius: 22px;
+    box-shadow: 0 9px 0 var(--ink);
+    background: #fff;
+  }
+
+  .xmas {
+    position: relative; overflow: hidden;
+    background: linear-gradient(var(--night), #2b2f86 70%, #4a4fa8);
+    color: #fff;
+  }
+  .xmas h2 { color: #fff; }
+  .xmas h2 em { font-style: normal; color: var(--sun); }
+  .xmas .lead { color: #e3e6ff; }
+  .flake { position: absolute; top: -20px; color: #fff; opacity: .85; animation: fall linear infinite; pointer-events: none; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+  .xmas-grid { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.6rem; align-items: center; }
+  .xmas-grid img { border: 6px solid #fff; border-radius: 22px; box-shadow: 0 9px 0 #0b0f38; }
+  .xmas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .8rem; font-size: 1.15rem; font-weight: 600; }
+  .xmas li { display: flex; gap: .7rem; align-items: flex-start; }
+  .xmas li b { font-size: 1.5rem; line-height: 1.2; }
+
+  .parents { background: #fff; }
+  .badges { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .badge {
+    display: flex; gap: .9rem; align-items: center;
+    padding: 1rem 1.2rem;
+    background: var(--cream);
+    border: 4px solid var(--ink); border-radius: 20px;
+    font-weight: 600;
+  }
+  .badge i {
+    flex: none; display: grid; place-items: center;
+    width: 48px; height: 48px; border-radius: 50%;
+    font-style: normal; font-size: 1.5rem;
+    background: var(--teal); border: 4px solid var(--ink);
+  }
+  .badge:nth-child(2) i { background: var(--sun); }
+  .badge:nth-child(3) i { background: var(--coral); }
+  .badge:nth-child(4) i { background: var(--grape); }
+
+  .cta { background: var(--sun); text-align: center; }
+  .cta img { width: 120px; margin: 0 auto 1rem; border: 5px solid var(--ink); border-radius: 28px; box-shadow: 0 7px 0 var(--ink); }
+
+  footer { background: var(--ink); color: #e9e4ff; text-align: center; padding: 2rem 16px 2.4rem; font-size: 1rem; }
+  footer nav { display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap; margin-bottom: .7rem; font-weight: 600; }
+  footer a { color: var(--sun); }
+
+  @media (max-width: 1100px) {
+    .sun { width: 90px; height: 90px; top: 1rem; right: 2%; border-width: 5px; box-shadow: 0 0 0 18px rgba(255, 236, 160, .45); }
+    .sun::before { top: 28px; left: 22px; width: 10px; height: 10px; box-shadow: 28px 0 0 var(--ink); }
+    .sun::after { top: 41px; left: 24px; width: 32px; height: 17px; border-width: 5px; }
+    .hero { padding-top: 6.5rem; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding-top: 5.5rem; }
+    .sun { width: 62px; height: 62px; right: 4%; top: .7rem; border-width: 4px; box-shadow: 0 0 0 12px rgba(255, 236, 160, .45); }
+    .sun::before { top: 19px; left: 15px; width: 7px; height: 7px; box-shadow: 18px 0 0 var(--ink); }
+    .sun::after { top: 28px; left: 16px; width: 22px; height: 12px; border-width: 4px; }
+    .scene { height: 300px; }
+    .road { height: 96px; }
+    .road::after { top: 42px; }
+    .grass { bottom: 86px; }
+    .hills { bottom: 96px; }
+    .tuk { bottom: 82px; }
+    section { padding: 3.5rem 0; }
+    .card { transform: none !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cloud, .road::after, .tuk, .flake { animation: none; }
+    .flake { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="wrap hero-text">
+    <h1 class="logo">Tuk<span>Overload</span></h1>
+    <p class="tagline">Load it up. Drive it home.<br>Don't drop the cake!</p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=com.imoshdewa.tukoverload">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M4 2.8v18.4c0 .7.8 1.1 1.4.7l15.2-9.2c.6-.4.6-1.2 0-1.5L5.4 2.1C4.8 1.7 4 2.1 4 2.8z"/></svg>
+      Get it on Google Play
+    </a>
+    <p class="note">Free to try &middot; No ads &middot; For ages 3 to 8</p>
+  </div>
+  <div class="scene" aria-hidden="true">
+    <div class="hills"></div>
+    <div class="grass"></div>
+    <div class="road"></div>
+    <img class="tuk" src="img/tuk.png" alt="">
+  </div>
+</header>
+
+<section class="features">
+  <div class="wrap">
+    <h2>Pile it high. Drive it home.</h2>
+    <p class="lead">A wobbly, giggly driving game made for little hands. No reading needed: everything is pictures and big buttons.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="emoji" aria-hidden="true">🧸</div>
+        <h3>Stack it</h3>
+        <p>Teddies, cakes, ice cream and presents. Pile them up your way, and tie the wobbly ones down with a rope.</p>
+      </div>
+      <div class="card">
+        <div class="emoji" aria-hidden="true">🛺</div>
+        <h3>Drive it</h3>
+        <p>Hold to go, press the big red brake to stop. Every bump makes the cargo wobble!</p>
+      </div>
+      <div class="card">
+        <div class="emoji" aria-hidden="true">🐄</div>
+        <h3>Watch out</h3>
+        <p>Cows wander onto the road, cars pull out and lights turn red. Slow down and wait!</p>
+      </div>
+      <div class="card">
+        <div class="emoji" aria-hidden="true">⭐</div>
+        <h3>Earn stars</h3>
+        <p>Up to three stars on every level, a best score to beat, and new maps to open.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="shots">
+  <div class="wrap">
+    <h2>Three bright worlds</h2>
+    <p class="lead">The countryside, a busy neighbourhood and the big city, each with its own road to the drop-off.</p>
+  </div>
+  <div class="strip">
+    <img src="img/1_cow.jpg" alt="The tuk-tuk stopping for a cow on a neighbourhood road" loading="lazy">
+    <img src="img/6_map.jpg" alt="The level map with stars and a winding road" loading="lazy">
+    <img src="img/2_result.jpg" alt="Three gold stars and a new best score" loading="lazy">
+    <img src="img/3_christmas_toss.jpg" alt="Santa tossing a present to a child at Christmas" loading="lazy">
+  </div>
+</section>
+
+<section class="xmas" id="christmas">
+  <div class="wrap">
+    <h2>Every December: <em>a free Christmas world</em></h2>
+    <p class="lead">From 1 December to 6 January the tuk-tuk turns into Santa's sleigh!</p>
+    <div class="xmas-grid">
+      <img src="img/5_christmas_eve.jpg" alt="Rudolph lighting the way for Santa's sleigh on Christmas Eve" loading="lazy">
+      <ul>
+        <li><b>🎁</b> Tap the children by the road to toss them a present. Slow down so it lands!</li>
+        <li><b>🏠</b> Drop gifts down the chimneys for a bonus.</li>
+        <li><b>🧝</b> Stop at the elves' workshop for more presents.</li>
+        <li><b>🦌</b> On Christmas Eve, Rudolph's red nose lights the way.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="parents">
+  <div class="wrap">
+    <h2>For grown-ups</h2>
+    <p class="lead">Made to be safe and simple, with nothing to worry about.</p>
+    <div class="badges">
+      <div class="badge"><i aria-hidden="true">🚫</i>No ads, ever</div>
+      <div class="badge"><i aria-hidden="true">🔒</i>No data collected, no accounts</div>
+      <div class="badge"><i aria-hidden="true">💳</i>One optional purchase, behind a grown-up question</div>
+      <div class="badge"><i aria-hidden="true">📴</i>Plays offline</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <img src="img/icon_512.png" alt="TukOverload app icon">
+    <h2>Ready to roll?</h2>
+    <p class="lead">The first map and the Christmas world are free. One purchase opens the rest for good.</p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=com.imoshdewa.tukoverload">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M4 2.8v18.4c0 .7.8 1.1 1.4.7l15.2-9.2c.6-.4.6-1.2 0-1.5L5.4 2.1C4.8 1.7 4 2.1 4 2.8z"/></svg>
+      Get it on Google Play
+    </a>
+  </div>
+</section>
+
+<footer>
+  <nav>
+    <a href="https://imoshdewa.github.io/tukoverload-privacy/">Privacy policy</a>
+    <a href="https://imoshdewa.github.io/tukoverload-privacy/terms.html">Terms of service</a>
+    <a href="mailto:info@jackoftrade.net">Contact</a>
+  </nav>
+  <div>&copy; 2026 TukOverload &middot; Google Play is a trademark of Google LLC.</div>
+</footer>
+
+<script>
+  // a few snowflakes drifting down over the Christmas section
+  (function () {
+    var box = document.getElementById("christmas");
+    if (!box || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for (var i = 0; i < 26; i++) {
+      var f = document.createElement("span");
+      f.className = "flake";
+      f.textContent = "❄";
+      f.style.left = (Math.random() * 100) + "%";
+      f.style.fontSize = (10 + Math.random() * 18) + "px";
+      f.style.animationDuration = (7 + Math.random() * 9) + "s";
+      f.style.animationDelay = (-Math.random() * 14) + "s";
+      box.appendChild(f);
+    }
+  })();
+</script>
+</body>
+</html>
